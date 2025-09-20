@@ -1,0 +1,495 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Expert Study — Personalized Course Platform</title>
+    <meta name="description" content="A professional, elegant single-file study website offering courses tailored to preferred learning experiences (visual, auditory, kinesthetic).">
+    <meta name="author" content="GitHub Copilot">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <style>
+        :root{
+            --bg:#061426; --card:#071a2a; --muted:#9fb0cc; --accent:#6ee7b7; --accent-2:#7dd3fc;
+            --glass: rgba(255,255,255,0.03); --radius:14px; --max-width:1200px; --gap:18px;
+            color-scheme: dark;
+            font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+        }
+        *{box-sizing:border-box}
+        html,body{height:100%;scroll-behavior:smooth}
+        body{
+            margin:0; padding:32px; background:
+            radial-gradient(900px 300px at 10% 10%, rgba(34,197,94,0.03), transparent 6%),
+            radial-gradient(700px 260px at 95% 90%, rgba(59,130,246,0.02), transparent 6%),
+            linear-gradient(180deg,var(--bg), #041426 95%);
+            color:#eaf3ff; -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale;
+            display:flex; align-items:flex-start; justify-content:center; font-size:16px;
+        }
+
+        /* Layout */
+        .container{width:100%;max-width:var(--max-width);margin:0 auto;display:grid;grid-template-columns:1fr;gap:var(--gap)}
+        header{display:flex;align-items:center;justify-content:space-between;gap:16px}
+        .brand{display:flex;align-items:center;gap:14px}
+        .logo{
+            width:64px;height:64px;border-radius:12px;background:linear-gradient(135deg,var(--accent),var(--accent-2));
+            display:flex;align-items:center;justify-content:center;color:#042024;font-weight:800;font-size:18px;box-shadow:0 8px 30px rgba(2,6,23,0.6)
+        }
+        .brand-info{display:flex;flex-direction:column;line-height:1}
+        .brand-title{font-weight:800;letter-spacing:0.2px}
+        .brand-sub{font-size:13px;color:var(--muted)}
+
+        nav.primary{display:flex;gap:10px;align-items:center;font-weight:600}
+        nav.primary a{color:var(--muted);text-decoration:none;padding:8px 12px;border-radius:10px;transition:all .14s}
+        nav.primary a:hover, nav.primary a:focus{color:#fff;background:var(--glass);transform:translateY(-1px)}
+        .nav-toggle{display:none;background:transparent;border:1px solid rgba(255,255,255,0.04);padding:8px;border-radius:10px;color:var(--muted);cursor:pointer}
+
+        main{display:grid;gap:18px}
+
+        .card{background:linear-gradient(180deg, rgba(255,255,255,0.02), transparent);padding:18px;border-radius:var(--radius);border:1px solid rgba(255,255,255,0.03);box-shadow:0 8px 30px rgba(2,6,23,0.5)}
+        .hero{display:grid;grid-template-columns:1fr 380px;gap:18px;align-items:center}
+        .hero h1{margin:0;font-size:30px;line-height:1.03}
+        .hero p{margin:8px 0 0;color:var(--muted)}
+        .cta-row{display:flex;gap:10px;margin-top:14px}
+        .btn{
+            background:linear-gradient(90deg,var(--accent),var(--accent-2));
+            border:none;padding:12px 16px;border-radius:12px;color:#042024;font-weight:800;cursor:pointer;display:inline-flex;align-items:center;gap:10px;box-shadow:0 8px 24px rgba(52,211,153,0.06);
+        }
+        .ghost{background:transparent;border:1px solid rgba(255,255,255,0.06);color:var(--muted);padding:10px 12px;border-radius:12px;cursor:pointer}
+
+        .mode-panel{padding:16px;border-radius:12px;background:linear-gradient(180deg, rgba(255,255,255,0.01), transparent);display:flex;flex-direction:column;gap:12px}
+        .modes{display:flex;gap:8px}
+        .modes label{flex:1;padding:10px;border-radius:10px;background:transparent;text-align:center;color:var(--muted);cursor:pointer;border:1px solid transparent;font-weight:700}
+        input[type="radio"]{display:none}
+        #mode-visual:checked ~ .modes label[for="mode-visual"],
+        #mode-audio:checked ~ .modes label[for="mode-audio"],
+        #mode-kinesthetic:checked ~ .modes label[for="mode-kinesthetic"]{background:linear-gradient(90deg, rgba(255,255,255,0.03), transparent);color:#fff;border:1px solid rgba(255,255,255,0.06);box-shadow:inset 0 -2px 0 rgba(255,255,255,0.02)}
+
+        .features{display:grid;grid-template-columns:1fr 360px;gap:18px}
+        .features-list{display:grid;gap:14px}
+        .feature{display:flex;gap:12px;align-items:flex-start}
+        .feature .ico{width:48px;height:48;border-radius:10px;background:rgba(255,255,255,0.02);display:flex;align-items:center;justify-content:center;color:var(--accent-2);font-weight:800}
+
+        .courses{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px}
+        .course-card{padding:14px;border-radius:12px;background:linear-gradient(180deg, rgba(255,255,255,0.01), transparent);border:1px solid rgba(255,255,255,0.03);transition:transform .14s,box-shadow .14s}
+        .course-card:hover{transform:translateY(-6px);box-shadow:0 18px 40px rgba(2,6,23,0.6)}
+        .course-meta{display:flex;justify-content:space-between;align-items:center;gap:10px}
+        .badge{padding:6px 8px;border-radius:999px;background:rgba(255,255,255,0.02);font-weight:700;color:var(--accent-2);font-size:13px}
+        .course-title{font-weight:800;margin:8px 0 6px;font-size:16px}
+        .course-desc{margin:0;color:var(--muted);font-size:13px}
+        .meta-row{display:flex;gap:8px;align-items:center;margin-top:12px;color:var(--muted);font-size:13px}
+        .enroll{margin-left:auto;text-decoration:none;padding:8px 10px;border-radius:8px;background:rgba(255,255,255,0.03);color:var(--accent-2);font-weight:700;cursor:pointer;border:0}
+
+        .learn-grid{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(220px,1fr))}
+        .topic{padding:14px;border-radius:12px;background:linear-gradient(180deg, rgba(255,255,255,0.01), transparent);border:1px solid rgba(255,255,255,0.03);display:flex;flex-direction:column;gap:10px;transition:transform .12s}
+        .topic:hover{transform:translateY(-6px)}
+        .links{display:flex;gap:8px;flex-wrap:wrap}
+        .link-btn{background:transparent;border:1px solid rgba(255,255,255,0.05);padding:8px 10px;border-radius:8px;color:var(--muted);font-size:13px;text-decoration:none;display:inline-flex;align-items:center;gap:8px}
+        .link-btn:hover{color:#fff;background:var(--glass)}
+
+        footer{display:flex;justify-content:space-between;align-items:center;gap:12px;color:var(--muted);padding:16px 0;border-top:1px solid rgba(255,255,255,0.02)}
+
+        /* responsive */
+        @media (max-width:980px){
+            .hero{grid-template-columns:1fr}
+            .features{grid-template-columns:1fr}
+            nav.primary{display:none}
+            .nav-toggle{display:inline-flex}
+        }
+        .nav-open nav.primary{display:flex;flex-direction:column;position:absolute;top:82px;left:16px;right:16px;background:linear-gradient(180deg, rgba(0,0,0,0.35), rgba(0,0,0,0.2));padding:12px;border-radius:12px;z-index:60}
+
+        /* Toast */
+        #toast{position:fixed;left:50%;transform:translateX(-50%);bottom:28px;background:linear-gradient(90deg,var(--accent),var(--accent-2));color:#042024;padding:12px 18px;border-radius:12px;box-shadow:0 12px 40px rgba(2,6,23,0.6);display:none;z-index:2000;font-weight:700;transition:transform .2s,opacity .2s}
+
+        /* accessibility focus */
+        :focus{outline:3px solid rgba(125,211,252,0.06);outline-offset:3px}
+        button, .enroll, .ghost, .btn, .link-btn{outline:none}
+        .muted{color:var(--muted)}
+    </style>
+</head>
+<body>
+    <a class="skip" href="#main-content" style="position:absolute;left:12px;top:12px;background:#00000088;padding:8px;border-radius:8px;color:#fff;z-index:1000;transform:translateY(-140%);transition:transform .18s">Skip to content</a>
+
+    <div class="container" role="main" id="main-content">
+        <header>
+            <div class="brand" aria-hidden="false">
+                <div class="logo">
+    <img src="image.jpg" alt="SP Logo" style="width:70px; height:70px; border: radius 10px;">
+</div>
+                <div class="brand-info">
+                    <div class="brand-title">Study with Codadex</div>
+                    <div class="brand-sub">Personalized courses • Professional paths</div>
+                </div>
+            </div>
+
+            <div style="display:flex;gap:12px;align-items:center;">
+                <button id="nav-toggle" class="nav-toggle" aria-expanded="false" aria-controls="primary-nav">☰ Menu</button>
+                <nav id="primary-nav" class="primary" role="navigation" aria-label="Primary">
+                    <a href="#courses">Courses</a>
+                    <a href="#paths">Learning Paths</a>
+                    <a href="#learn">Learn Programming</a>
+                    <a href="#resources">Resources</a>
+                    <a href="#contact">Contact</a>
+                </nav>
+            </div>
+        </header>
+
+        <main>
+            <section class="hero card" aria-labelledby="hero-title">
+                <div>
+                    <h1 id="hero-title">Master skills your way — visual, auditory, kinesthetic</h1>
+                    <p>Adaptive materials, focused paths, and hands-on practice to accelerate learning. Choose a preferred experience and follow curated content.</p>
+
+                    <div class="cta-row">
+                        <a class="btn" href="#paths">Explore Learning Paths</a>
+                        <a class="ghost" href="#learn">Curated Videos</a>
+                    </div>
+
+                    <div style="margin-top:16px;display:grid;gap:12px;grid-template-columns:repeat(2,1fr)">
+                        <div class="card" style="padding:12px">
+                            <strong>Goal-based paths</strong>
+                            <div class="muted" style="margin-top:6px;font-size:13px">Short, focused curricula for career transitions and certification prep.</div>
+                        </div>
+                        <div class="card" style="padding:12px">
+                            <strong>Expert toolkit</strong>
+                            <div class="muted" style="margin-top:6px;font-size:13px">Templates, spaced repetition tips and assessment rubrics.</div>
+                        </div>
+                    </div>
+                </div>
+
+                <aside class="mode-panel" aria-label="Preferred learning experience" id="mode-panel">
+                    <input type="radio" id="mode-visual" name="mode" value="visual" checked>
+                    <input type="radio" id="mode-audio" name="mode" value="audio">
+                    <input type="radio" id="mode-kinesthetic" name="mode" value="kinesthetic">
+
+                    <div><div style="font-weight:800">Preferred learning experience</div><div class="muted" style="font-size:13px">Switch to preview how courses adapt</div></div>
+
+                    <div class="modes" role="tablist" aria-label="Learning modes">
+                        <label for="mode-visual" role="tab" tabindex="0" aria-controls="view-visual">Visual</label>
+                        <label for="mode-audio" role="tab" tabindex="0" aria-controls="view-audio">Auditory</label>
+                        <label for="mode-kinesthetic" role="tab" tabindex="0" aria-controls="view-kinesthetic">Kinesthetic</label>
+                    </div>
+
+                    <div class="mode-views" aria-live="polite">
+                        <section id="view-visual"><div style="font-weight:700">Visual path</div><p class="muted" style="margin:6px 0 0">Infographics, annotated slides and diagram-first lessons.</p></section>
+                        <section id="view-audio"><div style="font-weight:700">Auditory path</div><p class="muted" style="margin:6px 0 0">Narrated lectures, podcasts and spoken summaries.</p></section>
+                        <section id="view-kinesthetic"><div style="font-weight:700">Kinesthetic path</div><p class="muted" style="margin:6px 0 0">Hands-on labs, checkpointed projects and guided challenges.</p></section>
+                    </div>
+                </aside>
+            </section>
+
+            <section class="features" id="paths" aria-labelledby="paths-title">
+                <div>
+                    <h2 id="paths-title" style="margin:0 0 8px">Expert learning paths</h2>
+                    <p class="muted" style="margin:0 0 14px">Role-focused curricula with measurable milestones and adaptive content.</p>
+
+                    <div class="features-list">
+                        <div class="feature card"><div class="ico">P</div><div><div style="font-weight:800">Path Builder</div><div class="muted" style="font-size:13px;margin-top:6px">Compose custom learning plans from modular blocks.</div></div></div>
+                        <div class="feature card"><div class="ico">A</div><div><div style="font-weight:800">Assessments</div><div class="muted" style="font-size:13px;margin-top:6px">Periodic checks with intelligent recommendations.</div></div></div>
+                        <div class="feature card"><div class="ico">R</div><div><div style="font-weight:800">Resource Library</div><div class="muted" style="font-size:13px;margin-top:6px">Cheat sheets, templates and curated reading lists.</div></div></div>
+                    </div>
+                </div>
+
+                <aside class="resources card" id="courses" aria-labelledby="courses-title">
+                    <h3 id="courses-title" style="margin:0 0 10px">Featured courses</h3>
+                    <div class="courses" role="list">
+                        <article class="course-card" role="listitem" aria-labelledby="c1" data-title="Advanced Web Architecture">
+                            <div class="course-meta">
+                                <div><div id="c1" class="course-title">Advanced Web Architecture</div><div class="course-desc">Design scalable systems and deployment strategies.</div></div>
+                                <div class="badge">Expert</div>
+                            </div>
+                            <div class="meta-row"><div class="muted">Architecture • Scalability</div></div>
+                            <div class="meta-row">
+                                <div class="progress-wrap"><progress value="32" max="100" aria-valuemin="0" aria-valuemax="100">32%</progress><div class="tiny">32% complete</div></div>
+                                <button class="enroll" type="button" data-course="Advanced Web Architecture" aria-label="Enroll in Advanced Web Architecture">Enroll</button>
+                            </div>
+                        </article>
+
+                        <article class="course-card" role="listitem" aria-labelledby="c2" data-title="Practical Machine Learning">
+                            <div class="course-meta">
+                                <div><div id="c2" class="course-title">Practical Machine Learning</div><div class="course-desc">From data pipelines to model deployment.</div></div>
+                                <div class="badge">Advanced</div>
+                            </div>
+                            <div class="meta-row"><div class="muted">ML • Deployment</div></div>
+                            <div class="meta-row">
+                                <div class="progress-wrap"><progress value="74" max="100">74%</progress><div class="tiny">74% complete</div></div>
+                                <button class="enroll" type="button" data-course="Practical Machine Learning" aria-label="Enroll in Practical Machine Learning">Enroll</button>
+                            </div>
+                        </article>
+
+                        <article class="course-card" role="listitem" aria-labelledby="c3" data-title="Effective Technical Communication">
+                            <div class="course-meta">
+                                <div><div id="c3" class="course-title">Effective Technical Communication</div><div class="course-desc">Write clearer docs and present ideas with impact.</div></div>
+                                <div class="badge">All levels</div>
+                            </div>
+                            <div class="meta-row"><div class="muted">Communication • Leadership</div></div>
+                            <div class="meta-row">
+                                <div class="progress-wrap"><progress value="55" max="100">55%</progress><div class="tiny">55% complete</div></div>
+                                <button class="enroll" type="button" data-course="Effective Technical Communication" aria-label="Enroll in Effective Technical Communication">Enroll</button>
+                            </div>
+                        </article>
+                    </div>
+
+                    <div style="margin-top:12px;display:flex;justify-content:space-between;align-items:center;">
+                        <div style="font-size:13px;color:var(--muted)">Browse full catalog</div>
+                        <a class="ghost" href="#resources" style="text-decoration:none;padding:8px 10px;border-radius:8px;">Catalog</a>
+                    </div>
+                </aside>
+            </section>
+
+            <section class="card" id="learn" aria-labelledby="learn-title">
+                <h2 id="learn-title" style="margin:0 0 8px">Learn Programming — curated video resources</h2>
+                <p class="muted" style="margin:0 0 14px">Hand-picked entry points and playlists for each language/topic. Links open YouTube search results so you can choose an instructor and format that fit you.</p>
+
+                <div style="margin-bottom:12px" class="filter-row">
+                    <label for="topic-search" class="muted" style="display:none">Filter topics</label>
+                    <input id="topic-search" class="search" type="search" placeholder="Filter topics (e.g. python, dsa, java)" aria-label="Filter programming topics" style="flex:1;padding:10px;border-radius:10px;border:1px solid rgba(255,255,255,0.03);background:transparent;color:inherit"/>
+                    <button id="clear-search" class="ghost" type="button" style="padding:8px 10px">Clear</button>
+                </div>
+
+                <div class="learn-grid" id="topics" role="list">
+                    <!-- topics -->
+                    <article class="topic" role="listitem" data-keywords="java jdk oop object-oriented">
+                        <h4>Java</h4><p class="muted">OOP, concurrency and JVM internals.</p>
+                        <div class="links">
+                            <a class="link-btn" href="https://www.youtube.com/results?search_query=java+full+course" target="_blank" rel="noopener noreferrer">Search: Java Full Course</a>
+                            <a class="link-btn" href="https://www.youtube.com/results?search_query=java+tutorial+for+beginners" target="_blank" rel="noopener noreferrer">Beginners Tutorials</a>
+                        </div>
+                    </article>
+
+                    <article class="topic" role="listitem" data-keywords="python py data science backend scripting">
+                        <h4>Python</h4><p class="muted">From beginner scripting to data science.</p>
+                        <div class="links">
+                            <a class="link-btn" href="https://www.youtube.com/results?search_query=python+full+course" target="_blank" rel="noopener noreferrer">Search: Python Full Course</a>
+                            <a class="link-btn" href="https://www.youtube.com/results?search_query=python+data+science+course" target="_blank" rel="noopener noreferrer">Data Science</a>
+                        </div>
+                    </article>
+
+                    <article class="topic" role="listitem" data-keywords="data structures algorithms dsa leetcode coding interview">
+                        <h4>Data Structures & Algorithms</h4><p class="muted">Core algorithms and interview problems.</p>
+                        <div class="links">
+                            <a class="link-btn" href="https://www.youtube.com/results?search_query=data+structures+and+algorithms+full+course" target="_blank" rel="noopener noreferrer">Search: DSA Full Course</a>
+                            <a class="link-btn" href="https://www.youtube.com/results?search_query=leetcode+patterns+tutorial" target="_blank" rel="noopener noreferrer">Interview Patterns</a>
+                        </div>
+                    </article>
+
+                    <article class="topic" role="listitem" data-keywords="c programming c pointers low-level embedded">
+                        <h4>C</h4><p class="muted">Systems programming and memory management.</p>
+                        <div class="links">
+                            <a class="link-btn" href="https://www.youtube.com/results?search_query=c+programming+full+course" target="_blank" rel="noopener noreferrer">Search: C Full Course</a>
+                        </div>
+                    </article>
+
+                    <article class="topic" role="listitem" data-keywords="c++ cpp stl object oriented performance">
+                        <h4>C++</h4><p class="muted">Modern C++, STL and performance patterns.</p>
+                        <div class="links">
+                            <a class="link-btn" href="https://www.youtube.com/results?search_query=c%2B%2B+full+course" target="_blank" rel="noopener noreferrer">Search: C++ Full Course</a>
+                        </div>
+                    </article>
+
+                    <article class="topic" role="listitem" data-keywords="javascript js node frontend react typescript">
+                        <h4>JavaScript & Frontend</h4><p class="muted">Core JS, frameworks and tooling.</p>
+                        <div class="links">
+                            <a class="link-btn" href="https://www.youtube.com/results?search_query=javascript+full+course" target="_blank" rel="noopener noreferrer">Search: JavaScript Full Course</a>
+                        </div>
+                    </article>
+
+                    <article class="topic" role="listitem" data-keywords="go golang rust systems performance modern languages">
+                        <h4>Other languages (Go, Rust)</h4><p class="muted">Systems and modern-language features.</p>
+                        <div class="links">
+                            <a class="link-btn" href="https://www.youtube.com/results?search_query=go+golang+full+course" target="_blank" rel="noopener noreferrer">Search: Go</a>
+                            <a class="link-btn" href="https://www.youtube.com/results?search_query=rust+programming+tutorial" target="_blank" rel="noopener noreferrer">Search: Rust</a>
+                        </div>
+                    </article>
+                </div>
+
+                <div class="muted" style="margin-top:12px;font-size:13px">Tip: use the filter to find topics quickly. Links open YouTube search results so you can pick the best instructor.</div>
+            </section>
+
+            <section class="card" id="resources" aria-labelledby="res-title">
+                <h2 id="res-title" style="margin:0 0 8px">Platform features & toolkit</h2>
+                <div class="muted" style="margin-bottom:14px">Assessment snapshots, exportable plans, and project labs built for mastery.</div>
+
+                <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:14px">
+                    <div style="padding:12px;border-radius:12px;background:rgba(255,255,255,0.01)"><strong>Assessment snapshots</strong><p class="muted" style="margin-top:8px">Automated checkpoints with rubric-based scoring.</p></div>
+                    <div style="padding:12px;border-radius:12px;background:rgba(255,255,255,0.01)"><strong>Exportable plans</strong><p class="muted" style="margin-top:8px">Download study plans as PDF or JSON.</p></div>
+                    <div style="padding:12px;border-radius:12px;background:rgba(255,255,255,0.01)"><strong>Project labs</strong><p class="muted" style="margin-top:8px">Hands-on graded projects with test harnesses.</p></div>
+                    <div style="padding:12px;border-radius:12px;background:rgba(255,255,255,0.01)"><strong>Mentor reviews</strong><p class="muted" style="margin-top:8px">Optional mentor feedback cycles for capstones.</p></div>
+                </div>
+            </section>
+
+            <section class="card" aria-labelledby="faq-title">
+                <div style="display:flex;gap:18px;align-items:flex-start;justify-content:space-between;flex-wrap:wrap">
+                    <div style="flex:1;min-width:280px">
+                        <h2 id="faq-title" style="margin:0 0 8px">FAQs</h2>
+                        <details style="margin-bottom:8px"><summary style="font-weight:700">How are courses adapted to my learning style?</summary><div class="muted" style="margin-top:8px">Modules present core content in multiple modalities to match your preference.</div></details>
+                        <details style="margin-bottom:8px"><summary style="font-weight:700">Do you provide certificates?</summary><div class="muted" style="margin-top:8px">Yes—completed paths include shareable certificates and competency statements.</div></details>
+                        <details><summary style="font-weight:700">Can I export my study plan?</summary><div class="muted" style="margin-top:8px">Plans and progress can be exported as PDF or JSON for integration with other tools.</div></details>
+                    </div>
+
+                    <form id="contact" style="width:320px;background:rgba(255,255,255,0.01);padding:14px;border-radius:12px;" aria-labelledby="contact-title" novalidate>
+                        <h3 id="contact-title" style="margin:0 0 10px">Get started / Contact</h3>
+                        <label for="contact-name" style="display:block;font-weight:700;font-size:13px;margin-bottom:6px">Name</label>
+                        <input id="contact-name" type="text" name="name" placeholder="Your name" style="width:100%;padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,0.03);background:transparent;color:inherit" />
+
+                        <label for="contact-email" style="display:block;font-weight:700;font-size:13px;margin:10px 0 6px">Email</label>
+                        <input id="contact-email" type="email" name="email" placeholder="you@example.com" style="width:100%;padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,0.03);background:transparent;color:inherit" />
+
+                        <label for="contact-goal" style="display:block;font-weight:700;font-size:13px;margin:10px 0 6px">Goal</label>
+                        <select id="contact-goal" name="goal" style="width:100%;padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,0.03);background:transparent;color:inherit">
+                            <option>Switch careers</option>
+                            <option>Upskill for current role</option>
+                            <option>Certification prep</option>
+                            <option>Other</option>
+                        </select>
+
+                        <label for="contact-course" style="display:block;font-weight:700;font-size:13px;margin:10px 0 6px">Interested course</label>
+                        <input id="contact-course" type="text" name="course" placeholder="Optional: course name" style="width:100%;padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,0.03);background:transparent;color:inherit" />
+
+                        <div style="display:flex;gap:8px;margin-top:12px;">
+                            <button class="btn" type="submit" style="flex:1">Request plan</button>
+                            <a class="ghost" href="#paths" style="display:inline-flex;align-items:center;padding:10px;border-radius:8px">Demo</a>
+                        </div>
+                        <div style="font-size:12px;color:var(--muted);margin-top:8px">Demo form — data is stored locally only.</div>
+                    </form>
+                </div>
+            </section>
+
+            <footer>
+                <div class="tiny" id="site-year">© 2025 Expert Study — Designed for professionals</div>
+                <div style="display:flex;gap:12px;">
+                    <a href="#" class="tiny" style="color:var(--muted);text-decoration:none">Privacy</a>
+                    <a href="#" class="tiny" style="color:var(--muted);text-decoration:none">Terms</a>
+                </div>
+            </footer>
+        </main>
+    </div>
+
+    <div id="toast" role="status" aria-live="polite"></div>
+
+    <script>
+        // minimal helpers
+        const $ = s => document.querySelector(s);
+        const $$ = s => Array.from(document.querySelectorAll(s));
+
+        document.addEventListener('DOMContentLoaded', () => {
+            // year
+            $('#site-year') && ($('#site-year').textContent = `© ${new Date().getFullYear()} Expert Study — Designed for professionals`);
+
+            // Skip link visibility on focus
+            const skip = document.querySelector('.skip');
+            if (skip) {
+                skip.addEventListener('focus', () => skip.style.transform = 'translateY(0)');
+                skip.addEventListener('blur', () => skip.style.transform = 'translateY(-140%)');
+            }
+
+            // preferred mode persistence & keyboard accessible labels
+            const savedMode = localStorage.getItem('preferredMode');
+            if (savedMode) {
+                const i = document.querySelector('input[name="mode"][value="' + savedMode + '"]');
+                if (i) i.checked = true;
+            }
+            const modeLabels = $$('.modes label');
+            modeLabels.forEach(lbl => {
+                lbl.addEventListener('click', () => {
+                    const id = lbl.getAttribute('for');
+                    const inp = document.getElementById(id);
+                    if (inp) { inp.checked = true; localStorage.setItem('preferredMode', inp.value); }
+                    modeLabels.forEach(l => l.setAttribute('aria-selected', 'false'));
+                    lbl.setAttribute('aria-selected', 'true');
+                    const panel = document.getElementById('mode-panel');
+                    if (panel) { panel.setAttribute('aria-busy', 'true'); setTimeout(() => panel.removeAttribute('aria-busy'), 220); }
+                });
+                lbl.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); lbl.click(); } });
+            });
+            modeLabels.forEach(l => {
+                const id = l.getAttribute('for'), inp = document.getElementById(id);
+                l.setAttribute('aria-selected', inp && inp.checked ? 'true' : 'false');
+            });
+
+            // make <progress> accessible
+            $$('progress').forEach(p => { const v = p.getAttribute('value'); if (v !== null) p.setAttribute('aria-valuenow', v); });
+
+            // Enroll buttons: pre-fill contact and track locally
+            $$('.enroll').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const course = btn.dataset.course || '';
+                    const courseEl = $('#contact-course');
+                    if (courseEl) courseEl.value = course;
+                    $('#contact-name') && $('#contact-name').focus();
+                    $('#contact') && $('#contact').scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    // track lightweight enrollment intent locally
+                    try {
+                        const list = JSON.parse(localStorage.getItem('enrollments') || '[]');
+                        if (!list.includes(course)) { list.push(course); localStorage.setItem('enrollments', JSON.stringify(list)); }
+                    } catch (e) { /* noop */ }
+                    showToast('Ready to enroll: ' + (course || 'selected course'));
+                });
+            });
+
+            // contact form (demo)
+            const form = $('#contact');
+            if (form) {
+                form.addEventListener('submit', e => {
+                    e.preventDefault();
+                    const nameEl = $('#contact-name');
+                    const emailEl = $('#contact-email');
+                    const goalEl = $('#contact-goal');
+                    const courseEl = $('#contact-course');
+                    const name = (nameEl?.value || '').trim();
+                    const email = (emailEl?.value || '').trim();
+                    if (!name) { showToast('Please enter your name'); nameEl && nameEl.focus(); return; }
+                    if (!validateEmail(email)) { showToast('Enter a valid email address'); emailEl && emailEl.focus(); return; }
+                    showToast(`Thanks, ${name}! A demo plan will be prepared.`);
+                    localStorage.setItem('lastRequest', JSON.stringify({
+                        name, email,
+                        goal: goalEl?.value || '',
+                        course: courseEl?.value || '',
+                        ts: Date.now()
+                    }));
+                    // clear sensitive fields in demo
+                    if (nameEl) nameEl.value = '';
+                    if (emailEl) emailEl.value = '';
+                });
+            }
+
+            // topic filter
+            const searchInput = $('#topic-search'); const clearBtn = $('#clear-search');
+            const topicNodes = Array.from($$('#topics .topic'));
+            const filterTopics = () => {
+                const q = (searchInput?.value || '').trim().toLowerCase();
+                topicNodes.forEach(n => {
+                    const text = ((n.dataset.keywords || '') + ' ' + (n.querySelector('h4')?.textContent || '')).toLowerCase();
+                    n.style.display = q === '' ? '' : (text.includes(q) ? '' : 'none');
+                });
+            };
+            if (searchInput) { searchInput.addEventListener('input', filterTopics); searchInput.addEventListener('keydown', e => { if (e.key === 'Escape') { searchInput.value = ''; filterTopics(); } }); }
+            if (clearBtn) { clearBtn.addEventListener('click', () => { if (searchInput) searchInput.value = ''; filterTopics(); searchInput?.focus(); }); }
+
+            // nav toggle
+            const navToggle = $('#nav-toggle'); const primaryNav = $('#primary-nav');
+            if (navToggle) navToggle.addEventListener('click', () => {
+                const open = document.documentElement.classList.toggle('nav-open');
+                navToggle.setAttribute('aria-expanded', String(open));
+            });
+            document.addEventListener('keydown', e => { if (e.key === 'Escape' && document.documentElement.classList.contains('nav-open')) { document.documentElement.classList.remove('nav-open'); navToggle?.setAttribute('aria-expanded', 'false'); navToggle?.focus(); } });
+            document.addEventListener('click', e => {
+                if (!primaryNav?.contains(e.target) && e.target !== navToggle && document.documentElement.classList.contains('nav-open')) {
+                    document.documentElement.classList.remove('nav-open'); navToggle?.setAttribute('aria-expanded', 'false');
+                }
+            });
+
+            // helpers
+            function validateEmail(email) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email); }
+
+            // toast
+            let toastTimer = null;
+            function showToast(msg, ms = 3000) {
+                const t = $('#toast'); if (!t) return;
+                t.textContent = msg; t.style.display = 'block'; t.style.opacity = '1'; t.style.transform = 'translateY(0)';
+                clearTimeout(toastTimer);
+                toastTimer = setTimeout(() => { t.style.opacity = '0'; t.style.transform = 'translateY(8px)'; setTimeout(() => t.style.display = 'none', 240); }, ms);
+            }
+            window.__expertStudy = { showToast, filterTopics };
+        });
+    </script>   
+</body>
+</html>
